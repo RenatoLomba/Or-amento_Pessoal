@@ -9,6 +9,18 @@ class Despesa {
         this.valor = valor
     }
 
+    validarDados() {
+        //percorre todos os atributos do próprio objeto
+        for(let i in this) {
+            //acessa o valor do atributo na posição i
+            if(this[i] == '' || this[i] == undefined || this[i] == null) {
+                return false
+            }
+        }
+
+        return true
+    }
+
 }
 
 class BD {
@@ -37,6 +49,13 @@ let bd = new BD()
 
 //Funções
 function cadastrarDespesa() {
+    let modal_title = document.getElementById('modal_title')
+    let modal_header = document.getElementById('modal_header')
+    let modal_body = document.getElementById('modal_body')
+    let modal_button = document.getElementById('modal_button')
+
+    modal_header.classList.remove('text-success', 'text-danger')
+    modal_button.classList.remove('btn-success', 'btn-danger')
     
     let ano = document.getElementById('ano').value
     let mes = document.getElementById('mes').value
@@ -47,6 +66,29 @@ function cadastrarDespesa() {
 
     let despesa = new Despesa(ano, mes, dia, tipo, descricao, valor)
 
-    bd.gravar(despesa)
+    validacaoTotal(despesa, despesa.validarDados(), modal_title, modal_header, modal_body, modal_button)
 
+}
+
+function validacaoTotal(despesa, validacao, title, header, body, button) {
+
+    if(validacao) {
+        //bd.gravar(despesa)
+        title.innerHTML = 'Sucesso'
+        header.classList.add('text-success')
+        body.innerHTML = 'Dados cadastrados com sucesso'
+        button.classList.add('btn-success')
+        $('#modalRegistraDespesa').modal('show')
+    } else {
+        title.innerHTML = 'Erro'
+        header.classList.add('text-danger')
+        body.innerHTML = 'Preencher todos os campos corretamente'
+        button.classList.add('btn-danger')
+        $('#modalRegistraDespesa').modal('show')
+    }
+
+}
+
+function carregarListaDespesas() {
+    alert("Carregando lista")
 }
