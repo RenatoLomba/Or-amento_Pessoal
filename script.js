@@ -43,6 +43,21 @@ class BD {
         localStorage.setItem(id, JSON.stringify(d))
         localStorage.setItem('id', id)
     }
+
+    recuperarRegistros() {
+        let id = localStorage.getItem('id')
+        let lista_despesas = Array()
+
+        for(let i = 1; i <= id; i++) {
+            let despesa = JSON.parse(localStorage.getItem(i))
+            if(despesa == null) {
+                continue
+            }
+            lista_despesas.push(despesa)
+        }
+
+        return lista_despesas
+    }
 }
 
 let bd = new BD()
@@ -73,7 +88,7 @@ function cadastrarDespesa() {
 function validacaoTotal(despesa, validacao, title, header, body, button) {
 
     if(validacao) {
-        //bd.gravar(despesa)
+        bd.gravar(despesa)
         title.innerHTML = 'Sucesso'
         header.classList.add('text-success')
         body.innerHTML = 'Dados cadastrados com sucesso'
@@ -90,5 +105,6 @@ function validacaoTotal(despesa, validacao, title, header, body, button) {
 }
 
 function carregarListaDespesas() {
-    alert("Carregando lista")
+    let lista_despesas = bd.recuperarRegistros()
+    console.log(lista_despesas)
 }
