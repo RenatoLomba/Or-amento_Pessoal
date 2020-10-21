@@ -106,5 +106,32 @@ function validacaoTotal(despesa, validacao, title, header, body, button) {
 
 function carregarListaDespesas() {
     let lista_despesas = bd.recuperarRegistros()
+    let tabelaDespesas = document.getElementById('tabelaDespesas') //seleciona o tbody
+
+    lista_despesas.forEach(function(d) {
+        let linha = tabelaDespesas.insertRow() //insere linhas dentro do tbody (tr)
+
+        //insere as colunas dentro da tr (td)
+        linha.insertCell(0).innerHTML = `${d.dia}/${("00" + d.mes).slice(-2)}/${d.ano}`
+
+        switch(d.tipo) {
+            case '1': d.tipo = 'Alimentação'
+                break
+            case '2': d.tipo = 'Educação'
+                break
+            case '3': d.tipo = 'Lazer'
+                break
+            case '4': d.tipo = 'Saúde'
+                break
+            case '5': d.tipo = 'Transporte'
+                break
+        }
+
+        linha.insertCell(1).innerHTML = d.tipo
+        linha.insertCell(2).innerHTML = d.descricao
+        linha.insertCell(3).innerHTML = d.valor
+
+    })
+
     console.log(lista_despesas)
 }
