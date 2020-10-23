@@ -58,6 +58,10 @@ class BD {
 
         return lista_despesas
     }
+
+    pesquisar(d) {
+         
+    }
 }
 
 let bd = new BD()
@@ -88,12 +92,13 @@ function cadastrarDespesa() {
 function validacaoTotal(despesa, validacao, title, header, body, button) {
 
     if(validacao) {
-        bd.gravar(despesa)
+        //bd.gravar(despesa)
         title.innerHTML = 'Sucesso'
         header.classList.add('text-success')
         body.innerHTML = 'Dados cadastrados com sucesso'
         button.classList.add('btn-success')
         $('#modalRegistraDespesa').modal('show')
+        limparCampos()
     } else {
         title.innerHTML = 'Erro'
         header.classList.add('text-danger')
@@ -132,6 +137,26 @@ function carregarListaDespesas() {
         linha.insertCell(3).innerHTML = d.valor
 
     })
+}
 
-    console.log(lista_despesas)
+function limparCampos() {
+    document.getElementById('ano').value = ""
+    document.getElementById('mes').value = ""
+    document.getElementById('dia').value = ""
+    document.getElementById('tipo').value = ""
+    document.getElementById('descricao').value = ""
+    document.getElementById('valor').value = ""
+}
+
+function pesquisarDespesa() {
+    let ano = document.getElementById('ano').value
+    let mes = document.getElementById('mes').value
+    let dia = document.getElementById('dia').value
+    let tipo = document.getElementById('tipo').value
+    let descricao = document.getElementById('descricao').value
+    let valor = document.getElementById('valor').value
+
+    let despesa = new Despesa(ano, mes, dia, tipo, descricao, valor)
+
+    bd.pesquisar(despesa)
 }
