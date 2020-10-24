@@ -23,6 +23,44 @@ class Despesa {
 
 }
 
+class Modal {
+
+    constructor() {
+        this.title
+        this.header
+        this.body
+        this.button
+    }
+
+    criarModal() {
+        this.title = document.getElementById('modal_title')
+        this.header = document.getElementById('modal_header')
+        this.body = document.getElementById('modal_body')
+        this.button = document.getElementById('modal_button')
+    }
+
+    Sucesso() {
+        this.header.classList.remove('text-success', 'text-danger')
+        this.button.classList.remove('btn-success', 'btn-danger')
+        this.title.innerHTML = 'Sucesso'
+        this.header.classList.add('text-success')
+        this.body.innerHTML = 'Dados cadastrados com sucesso'
+        this.button.classList.add('btn-success')
+        $('#modalRegistraDespesa').modal('show')
+    }
+
+    Erro(titulo, mensagem) {
+        this.header.classList.remove('text-success', 'text-danger')
+        this.button.classList.remove('btn-success', 'btn-danger')
+        this.title.innerHTML = titulo
+        this.header.classList.add('text-danger')
+        this.body.innerHTML = mensagem
+        this.button.classList.add('btn-danger')
+        $('#modalRegistraDespesa').modal('show')
+    }
+}
+let modal = new Modal()
+
 class BD {
 
     constructor() {
@@ -53,6 +91,7 @@ class BD {
             if(despesa == null) {
                 continue
             }
+            despesa.id = i
             lista_despesas.push(despesa)
         }
 
@@ -60,21 +99,34 @@ class BD {
     }
 
     pesquisar(d) {
-         
-    }
-}
+        let despesas_filter = this.recuperarRegistros()
+        modal.criarModal()
+        
+        if(d.ano != '') { despesas_filter = despesas_filter.filter(f => f.ano == d.ano) }
+        if(d.mes != '') { despesas_filter = despesas_filter.filter(f => f.mes == d.mes) }
+        if(d.dia != '') { despesas_filter = despesas_filter.filter(f => f.dia == d.dia) }
+        if(d.tipo != '') { despesas_filter = despesas_filter.filter(f => f.tipo == d.tipo) }
+        if(d.descricao != '') { despesas_filter = despesas_filter.filter(f => f.descricao == d.descricao) }
+        if(d.valor != '') { despesas_filter = despesas_filter.filter(f => f.valor == d.valor) }
 
+        if(despesas_filter == 0) {
+            modal.Erro('Pesquisa concluída', 'Não foi encontrada nenhuma despesa com estes filtros...')
+            return this.recuperarRegistros()
+        } else {
+            return despesas_filter
+        }
+        
+    }
+
+    remover(id) {
+        localStorage.removeItem(id)
+    }
+
+}
 let bd = new BD()
 
 //Funções
 function cadastrarDespesa() {
-    let modal_title = document.getElementById('modal_title')
-    let modal_header = document.getElementById('modal_header')
-    let modal_body = document.getElementById('modal_body')
-    let modal_button = document.getElementById('modal_button')
-
-    modal_header.classList.remove('text-success', 'text-danger')
-    modal_button.classList.remove('btn-success', 'btn-danger')
     
     let ano = document.getElementById('ano').value
     let mes = document.getElementById('mes').value
@@ -85,32 +137,30 @@ function cadastrarDespesa() {
 
     let despesa = new Despesa(ano, mes, dia, tipo, descricao, valor)
 
-    validacaoTotal(despesa, despesa.validarDados(), modal_title, modal_header, modal_body, modal_button)
+    validacaoTotal(despesa, despesa.validarDados())
 
 }
 
-function validacaoTotal(despesa, validacao, title, header, body, button) {
+function validacaoTotal(despesa, validacao) {
+
+    modal.criarModal()
 
     if(validacao) {
-        //bd.gravar(despesa)
-        title.innerHTML = 'Sucesso'
-        header.classList.add('text-success')
-        body.innerHTML = 'Dados cadastrados com sucesso'
-        button.classList.add('btn-success')
-        $('#modalRegistraDespesa').modal('show')
+        bd.gravar(despesa)
+        modal.Sucesso()
         limparCampos()
     } else {
-        title.innerHTML = 'Erro'
-        header.classList.add('text-danger')
-        body.innerHTML = 'Preencher todos os campos corretamente'
-        button.classList.add('btn-danger')
-        $('#modalRegistraDespesa').modal('show')
+        modal.Erro('Erro', 'Preencher todos os campos corretamente...')
     }
 
 }
 
-function carregarListaDespesas() {
-    let lista_despesas = bd.recuperarRegistros()
+function listarTodasDespesas() {
+    carregarListaDespesas(bd.recuperarRegistros())
+}
+
+function carregarListaDespesas(parametroBusca) {
+    let lista_despesas = parametroBusca
     let tabelaDespesas = document.getElementById('tabelaDespesas') //seleciona o tbody
 
     lista_despesas.forEach(function(d) {
@@ -136,6 +186,18 @@ function carregarListaDespesas() {
         linha.insertCell(2).innerHTML = d.descricao
         linha.insertCell(3).innerHTML = d.valor
 
+        let btn = document.createElement("button")
+        btn.className = "btn btn-danger"
+        btn.innerHTML = '<i class="fas fa-times"></i>'
+        btn.id = `id_despesa_${d.id}`
+        btn.onclick = function() {
+            bd.remover(d.id)
+            window.location.reload()
+        }
+        linha.insertCell(4).append(btn)
+
+        console.log(d)
+
     })
 }
 
@@ -148,6 +210,15 @@ function limparCampos() {
     document.getElementById('valor').value = ""
 }
 
+function limparDespesas() {
+    let lista_despesas = bd.recuperarRegistros()
+    let tabelaDespesas = document.getElementById('tabelaDespesas')
+
+    for(let i = 0; i < lista_despesas.length; i++) {
+        tabelaDespesas.deleteRow(-1)
+    }
+}
+
 function pesquisarDespesa() {
     let ano = document.getElementById('ano').value
     let mes = document.getElementById('mes').value
@@ -158,5 +229,7 @@ function pesquisarDespesa() {
 
     let despesa = new Despesa(ano, mes, dia, tipo, descricao, valor)
 
-    bd.pesquisar(despesa)
+    limparDespesas()
+
+    carregarListaDespesas(bd.pesquisar(despesa))
 }
